@@ -1,0 +1,22 @@
+[project]
+name = "multi-agent-cv-flow"
+version = "0.1.0"
+description = "Sekventiellt multi-agent-flöde för CV-analys och jobbmatchning med LangGraph."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "langchain>=0.3.0",
+    "langgraph>=0.2.0",
+    "pypdf>=5.0.0",
+    "python-docx>=1.1.2"
+]
+
+[project.scripts]
+cv-flow = "mlops_multiagent.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true

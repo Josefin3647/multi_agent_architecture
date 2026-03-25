@@ -1,0 +1,1 @@
+"""Agentnoder för grafen."""
