@@ -35,14 +35,32 @@ def run_recommendation_agent(state: FlowState) -> FlowState:
         f"Körkort: {bool_to_swedish(profile.get('driving_license'))}",
         f"Pendlingsvilja: {bool_to_swedish(profile.get('commute_willingness'))}",
         "",
-        f"Bedömning: {assessment['explanation']}",
-        f"Antal relevanta jobb: {assessment['relevant_job_count']}",
-        f"Genomsnittlig matchningsnivå: {assessment['average_match_score']} %",
-        "",
-        "Starkaste jobbmatchningar:",
-        _format_top_jobs(state),
-        "",
     ]
+
+    if assessment["relevant_job_count"] > 0:
+        lines.extend(
+            [
+                f"Bedömning: {assessment['explanation']}",
+                f"Antal relevanta jobb: {assessment['relevant_job_count']}",
+                f"Genomsnittlig matchningsnivå: {assessment['average_match_score']} %",
+                "",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "Vi kunde tyvärr inte hitta några relevanta jobb just nu baserat på din profil.",
+                "",
+            ]
+        )
+
+    lines.extend(
+        [
+            "Starkaste jobbmatchningar:",
+            _format_top_jobs(state),
+            "",
+        ]
+    )
 
     if state.get("recurring_requirements"):
         lines.append("Återkommande krav i annonserna: " + ", ".join(state["recurring_requirements"]))
@@ -60,11 +78,17 @@ def run_recommendation_agent(state: FlowState) -> FlowState:
     focus = assessment.get("focus_for_agent_4")
 
     if focus == "jobs":
-        lines.append("Fokus framåt: sök jobben direkt och förbättra CV:t med tydliga exempel på dina starkaste kompetenser.")
+        lines.append(
+            "Fokus framåt: sök jobben direkt och förbättra CV:t med tydliga exempel på dina starkaste kompetenser."
+        )
     elif focus == "jobs_and_advice":
-        lines.append("Fokus framåt: sök de bästa jobben nu och förstärk samtidigt profilen med tydligare kompetenser och erfarenheter.")
+        lines.append(
+            "Fokus framåt: sök de bästa jobben nu och förstärk samtidigt profilen med tydligare kompetenser och erfarenheter."
+        )
     else:
-        lines.append("Fokus framåt: sök de få jobb som redan är rimliga och komplettera med utbildning för att öka dina chanser.")
+        lines.append(
+            "Fokus framåt: sök de få jobb som redan är rimliga och komplettera med utbildning för att öka dina chanser."
+        )
         if assessment.get("suggestions"):
             lines.append("Rekommenderade utbildningar eller utvecklingsområden:")
             lines.extend(f"- {suggestion}" for suggestion in assessment["suggestions"])

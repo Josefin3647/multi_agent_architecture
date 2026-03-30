@@ -1,29 +1,37 @@
 # Multi-Agent CV Flow
 
-A pedagogical example of a sequential multi-agent workflow built with Python, LangChain, and LangGraph.
+This project demonstrates a sequential multi-agent workflow for CV processing and job recommendation using Python, LangChain, and LangGraph.
+
+The system validates uploaded CV files, extracts candidate information, matches the profile against an internal job database, assesses the quality of the match, and presents recommendations. A final human-in-the-loop (HITL) step allows the user to choose whether to be contacted personally.
+
+---
 
 ## Features
 
 - Security validation of uploaded CV files
 - Support for `.pdf` and `.docx`
+- Sequential multi-agent workflow implemented with LangGraph
+- Shared state passed between all agents
 - 4 agents:
   1. Intake + Profiling Agent
   2. Job Matching Agent
   3. Assessment Agent
   4. Recommendation Agent
 - Mocked internal job database using local JSON
-- Stubbed web search for skills and education suggestions
-- Human-in-the-loop (HITL) step via terminal
+- Stubbed web search for labor market context and education suggestions
+- Human-in-the-loop (HITL) step via terminal after the final result
+
+---
 
 ## Project Structure
 
-```text
 multi-agent-cv-flow/
 ├─ pyproject.toml
 ├─ README.md
-├─ sample_data/
-│  ├─ jobs.json
-│  └─ example_cv.txt
+├─ data/
+│  ├─ cv_test.docx
+│  ├─ cv_test_spam.pdf
+│  └─ jobs.json
 └─ src/
    └─ mlops_multiagent/
       ├─ __init__.py
@@ -34,6 +42,7 @@ multi-agent-cv-flow/
       ├─ models.py
       ├─ agents/
       │  ├─ __init__.py
+      │  ├─ common.py
       │  ├─ intake_profile.py
       │  ├─ job_matcher.py
       │  ├─ assessment.py
@@ -44,17 +53,19 @@ multi-agent-cv-flow/
          ├─ security.py
          └─ text_processing.py
 
-```
+---
 
 ## Installation
 
-This project uses uv for dependency management.
+This project uses `uv` for dependency management.
 
 Install dependencies:
 
 ```bash
 uv sync
 ```
+
+---
 
 ## Running the Application
 
@@ -64,65 +75,56 @@ Start the program:
 uv run mlops-multiagent
 ```
 
-Follow the instructions in the terminal:
+Example with arguments:
 
-- Provide the path to your CV file (.pdf or .docx)
-- Enter preferred job location
-- Choose employment type (full-time/part-time)
-- Optionally provide languages, driver's license, and commuting preference
+uv run mlops-multiagent \
+  --cv-path ./data/cv_test.docx \
+  --location Stockholm \
+  --employment-type deltid \
+  --language svenska \
+  --driving-license ja \
+  --commute-willingness nej
 
-After processing, you will receive:
+---
+
+## User Input
+
+- CV file path (.pdf or .docx)
+- Job location
+- Employment type (heltid/deltid)
+- Optional: language, driving license, commuting willingness
+
+---
+
+## Output
 
 - Job recommendations
-- Skill gap analysis (if applicable)
-- A HITL prompt asking if you want to be contacted
+- Skill gap analysis
+- Training suggestions (if needed)
+- HITL prompt (contact yes/no)
+
+---
 
 ## Test Data
 
-The sample_data/ folder contains files for testing the workflow:
+- cv_test.docx – valid CV
+- cv_test_spam.pdf – should be blocked
+- jobs.json – internal job database
 
-- cv_test.docx – example of a valid CV that passes through the full pipeline
-- cv_test_spam.pdf – contains intentionally suspicious content and should be blocked by the security check
-- jobs.json – mocked internal job database used for matching
+---
 
-## Testing the Flow
-Valid Flow
-Run the program
-Provide sample_data/cv_test.docx
-Fill in the requested inputs
-Verify that all agents execute and produce a final recommendation + HITL prompt
+## Architecture
 
-## Security Validation
-Run the program
-Provide sample_data/cv_test_spam.pdf
-Verify that the workflow is stopped before Agent 1
+Security -> Agent1 -> Agent2 -> Agent3 -> Agent4 -> HITL
 
-## How It Works
+Shared state is passed through all steps.
 
-The system is built as a sequential multi-agent workflow using LangGraph:
+---
 
-Security Check
-Validates file type, size, and content
-Stops the flow if suspicious patterns are detected´
+## Notes
 
-Agent 1 – Intake & Profiling
-Extracts experience, skills, and education from the CV
-Builds a structured candidate profile
-Agent 2 – Job Matching
-Matches the profile against a local job database
-Scores and ranks relevant job postings
-Agent 3 – Assessment
-Evaluates match quality
-Identifies skill gaps
-Uses stubbed web search for additional context
-Agent 4 – Recommendation
-Presents job matches and/or training suggestions
-Explains reasoning in a user-friendly way
-HITL (Human-in-the-Loop)
-User chooses whether to be contacted
-Collects name and email if applicable
-Notes
-The implementation is intentionally simple and modular for educational purposes
-Agents are rule-based but can easily be replaced with LLM-powered logic
-Job matching uses internal data only (no external APIs)
-Web search in Agent 3 is simulated via a stub function
+- Educational project
+- Rule-based agents
+- Easy to extend with LLMs
+- Internal job data only
+- Stubbed web search
