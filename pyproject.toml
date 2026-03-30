@@ -1,18 +1,19 @@
 [project]
-name = "multi-agent-cv-flow"
+name = "mlops-multiagent"
 version = "0.1.0"
-description = "Sequential multi-agent workflow for CV analysis and job matching with LangGraph."
+description = "Sequential multi-agent flow for CV matching with LangGraph and LangChain"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "langchain>=0.3.0",
-    "langgraph>=0.2.0",
-    "pypdf>=5.0.0",
-    "python-docx>=1.1.2"
+  "langchain>=0.3.0",
+  "langgraph>=0.2.0",
+  "pydantic>=2.7.0",
+  "pypdf>=5.0.0",
+  "python-docx>=1.1.0",
 ]
 
 [project.scripts]
-cv-flow = "mlops_multiagent.main:main"
+mlops-multiagent = "mlops_multiagent.main:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -20,6 +21,3 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mlops_multiagent"]
-
-[tool.uv]
-package = true

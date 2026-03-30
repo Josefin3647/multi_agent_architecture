@@ -1,125 +1,60 @@
-"""Definition av LangGraph-flödet."""
-
 from __future__ import annotations
-
-from pathlib import Path
-from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 
-from mlops_multiagent.agents.assessment import assessment_agent
-from mlops_multiagent.agents.intake_profile import intake_profile_agent
-from mlops_multiagent.agents.job_matcher import job_matching_agent
-from mlops_multiagent.agents.recommendation import recommendation_agent
-from mlops_multiagent.models import ContactRequest
-from mlops_multiagent.state import AppState
-from mlops_multiagent.utils.security import validate_document_security
+from mlops_multiagent.agents.assessment import run_assessment_agent
+from mlops_multiagent.agents.intake_profile import run_intake_profile_agent
+from mlops_multiagent.agents.job_matcher import run_job_matcher_agent
+from mlops_multiagent.agents.recommendation import run_recommendation_agent
+from mlops_multiagent.state import FlowState
+from mlops_multiagent.utils.security import run_security_check
 
 
-def security_check_node(state: AppState) -> dict[str, Any]:
-    """Validerar dokument innan agentflödet får läsa innehållet."""
-    file_path = Path(state["user_input"]["cv_path"])
-    result = validate_document_security(file_path)
+def security_node(state: FlowState) -> FlowState:
+    result = run_security_check(state["cv_path"])
+    state["security_check"] = result
 
-    if not result["approved"]:
-        return {
-            "security": result,
-            "error": str(result["message"]),
-        }
-
-    return {"security": result}
-
-
-def route_after_security(state: AppState) -> str:
-    """Styr grafen beroende på om dokumentet godkändes."""
-    security = state.get("security", {})
-    if not security.get("approved", False):
-        return "stop"
-    return "continue"
-
-
-def rejection_node(state: AppState) -> dict[str, Any]:
-    """Slutnod om dokumentet inte klarar säkerhetskontrollen."""
-    message = state.get("error", "Dokumentet kunde inte godkännas.")
-    return {
-        "final_recommendation": (
-            "Flödet stoppades av säkerhetsskäl.\n"
-            f"Orsak: {message}\n"
-            "Ladda gärna upp ett rent och läsbart PDF- eller DOCX-dokument och försök igen."
+    if not result["is_safe"]:
+        state["stop_flow"] = True
+        state["error_message"] = (
+            "CV:t kunde inte behandlas eftersom säkerhetskontrollen stoppade flödet. "
+            + " ".join(result["reasons"])
         )
-    }
+
+    return state
 
 
-def hitl_node(state: AppState) -> dict[str, Any]:
-    """Enkelt HITL-steg i terminalen efter Agent 4."""
-    print("\n" + "=" * 80)
-    print("RESULT")
-    print("=" * 80)
-    print(state.get("final_recommendation", "No recommendation was generated."))
+def blocked_node(state: FlowState) -> FlowState:
+    return state
 
-    print("\n" + "=" * 80)
-    print("HITL – personal contact")
-    print("=" * 80)
 
-    answer = input("Would you like to be contacted personally? (yes/no): ").strip().lower()
-
-    if not answer or answer == "no":
-        contact = ContactRequest(wants_contact=False)
-        return {
-            "hitl": {
-                "wants_contact": contact.wants_contact,
-                "name": contact.name,
-                "email": contact.email,
-            }
-        }
-
-    if answer == "yes":
-        name = input("Enter your name: ").strip()
-        email = input("Enter your email: ").strip()
-        contact = ContactRequest(wants_contact=True, name=name, email=email)
-        return {
-            "hitl": {
-                "wants_contact": contact.wants_contact,
-                "name": contact.name,
-                "email": contact.email,
-            }
-        }
-
-    return {
-        "hitl": {
-            "wants_contact": False,
-            "name": "",
-            "email": "",
-        }
-    }
+def route_after_security(state: FlowState) -> str:
+    return "blocked" if state.get("stop_flow") else "agent_1"
 
 
 def build_graph():
-    """Bygger och kompilerar LangGraph-flödet."""
-    graph = StateGraph(AppState)
+    workflow = StateGraph(FlowState)
 
-    graph.add_node("security_check", security_check_node)
-    graph.add_node("reject", rejection_node)
-    graph.add_node("agent_1_intake_profile", intake_profile_agent)
-    graph.add_node("agent_2_job_matching", job_matching_agent)
-    graph.add_node("agent_3_assessment", assessment_agent)
-    graph.add_node("agent_4_recommendation", recommendation_agent)
-    graph.add_node("hitl", hitl_node)
+    workflow.add_node("security", security_node)
+    workflow.add_node("blocked", blocked_node)
+    workflow.add_node("agent_1", run_intake_profile_agent)
+    workflow.add_node("agent_2", run_job_matcher_agent)
+    workflow.add_node("agent_3", run_assessment_agent)
+    workflow.add_node("agent_4", run_recommendation_agent)
 
-    graph.add_edge(START, "security_check")
-    graph.add_conditional_edges(
-        "security_check",
+    workflow.add_edge(START, "security")
+    workflow.add_conditional_edges(
+        "security",
         route_after_security,
         {
-            "continue": "agent_1_intake_profile",
-            "stop": "reject",
+            "blocked": "blocked",
+            "agent_1": "agent_1",
         },
     )
-    graph.add_edge("agent_1_intake_profile", "agent_2_job_matching")
-    graph.add_edge("agent_2_job_matching", "agent_3_assessment")
-    graph.add_edge("agent_3_assessment", "agent_4_recommendation")
-    graph.add_edge("agent_4_recommendation", "hitl")
-    graph.add_edge("reject", END)
-    graph.add_edge("hitl", END)
+    workflow.add_edge("blocked", END)
+    workflow.add_edge("agent_1", "agent_2")
+    workflow.add_edge("agent_2", "agent_3")
+    workflow.add_edge("agent_3", "agent_4")
+    workflow.add_edge("agent_4", END)
 
-    return graph.compile()
+    return workflow.compile()

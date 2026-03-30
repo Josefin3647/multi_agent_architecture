@@ -1,153 +1,118 @@
-"""Agent 3: Bedömningsagent."""
-
 from __future__ import annotations
 
-from statistics import mean
-from typing import Any
+from collections import Counter
 
-from mlops_multiagent.models import AssessmentResult
-from mlops_multiagent.state import AppState
+from mlops_multiagent.agents.common import ensure_security_ok
+from mlops_multiagent.state import FlowState
 
 
-def stub_web_search(query: str) -> list[dict[str, str]]:
-    """
-    Stubbad webbsökning.
+def stub_web_search_role_context(profile: dict) -> list[str]:
+    skills = set(profile.get("skills", []))
+    results: list[str] = []
 
-    I en riktig lösning hade detta kunnat anropa ett webbsöksverktyg.
-    Här returneras hårdkodade resultat för att visa arkitekturen.
-    """
-    knowledge_base = {
-        "kundservice": [
-            {
-                "title": "Vanliga krav inom kundservice",
-                "snippet": "Svenska, serviceförmåga, administration och digital vana återkommer ofta.",
-            }
-        ],
-        "butik": [
-            {
-                "title": "Vanliga krav inom butik",
-                "snippet": "Kassa, kundbemötande, försäljning och ibland truckkort eller varuplock.",
-            }
-        ],
-        "administration": [
-            {
-                "title": "Efterfrågade administrativa kompetenser",
-                "snippet": "Excel, dokumenthantering och digitala kontorsverktyg är vanliga krav.",
-            }
-        ],
-        "truckkort": [
-            {
-                "title": "Rekommenderad utbildning",
-                "snippet": "Kort truckutbildning kan stärka möjligheten för lager- och logistikjobb.",
-            }
-        ],
-    }
+    if {"kundservice", "butik"} & skills:
+        results.extend(
+            [
+                "Vanliga krav i butik och kundservice är god svenska, servicevana och kassasystem.",
+                "Många roller premierar säljerfarenhet, flexibilitet och grundläggande digital vana.",
+            ]
+        )
 
-    results: list[dict[str, str]] = []
-    query_lower = query.lower()
-    for key, items in knowledge_base.items():
-        if key in query_lower:
-            results.extend(items)
+    if {"python", "sql", "docker", "mlops"} & skills:
+        results.extend(
+            [
+                "Teknikroller efterfrågar ofta Python, Git, SQL, testning och moln- eller Docker-vana.",
+                "Juniora tekniska roller gynnas av projektportfölj och tydligt beskriven systemvana.",
+            ]
+        )
 
     if not results:
-        results.append(
-            {
-                "title": "Allmän arbetsmarknadskontext",
-                "snippet": "Digital vana, språk och tydligt formulerade kompetenser förbättrar ofta matchning.",
-            }
+        results.extend(
+            [
+                "Vanliga generella krav är tydlig kommunikation, digital vana och relevant arbetslivserfarenhet.",
+                "Kompletterande kortkurser kan stärka en profil när antalet matchande jobb är lågt.",
+            ]
         )
+
     return results
 
 
-def _identify_primary_reason(
-    profile: dict[str, Any],
-    job_matches: list[dict[str, Any]],
-    recurring_requirements: list[str],
-) -> str:
-    """Förklarar varför matchningen blev stark eller svag."""
-    if not job_matches:
-        return "Det finns få eller inga träffar i den interna datakällan för den här kombinationen av profil och önskemål."
-
-    desired_location = str(profile["desired_location"]).lower()
-    desired_type = str(profile["desired_employment_type"]).lower()
-
-    same_location = [job for job in job_matches if job["location"].lower() == desired_location]
-    same_type = [job for job in job_matches if job["employment_type"].lower() == desired_type]
-
-    if len(same_location) < max(1, len(job_matches) // 2):
-        return "Geografisk begränsning verkar minska urvalet."
-    if len(same_type) < max(1, len(job_matches) // 2):
-        return "Önskemål om arbetstid verkar minska urvalet."
-    if recurring_requirements:
-        return "Kompetensgap påverkar sannolikt matchningen."
-    if profile.get("interpretation_uncertainty"):
-        return "CV:t eller profilen verkar något otydlig, vilket kan försvåra matchning."
-    return "Matchningen påverkas troligen av allmän efterfrågan i området och kandidatens profil."
-
-
-def assessment_agent(state: AppState) -> dict[str, Any]:
-    """Avgör om resultatet främst ska fokusera på jobb eller även råd/utbildning."""
-    profile = state["candidate_profile"]
-    job_matches = state.get("job_matches", [])
-    recurring_requirements = state.get("recurring_requirements", [])
-
-    num_jobs = len(job_matches)
-    avg_score = mean([job["match_score"] for job in job_matches]) if job_matches else 0.0
-
-    skill_gaps = recurring_requirements[:5]
-    explanation_root = _identify_primary_reason(profile, job_matches, recurring_requirements)
-
-    search_queries = [
-        "kundservice butik administration efterfrågade kompetenser",
-        "truckkort utbildning",
-    ]
-    web_context: list[str] = []
-    for query in search_queries:
-        for item in stub_web_search(query):
-            web_context.append(item["snippet"])
-
-    education_suggestions: list[str] = []
-    if "truckkort" in skill_gaps:
-        education_suggestions.append("Truckutbildning")
-    if any(skill in skill_gaps for skill in ["administration", "excel", "digitala kontorsverktyg"]):
-        education_suggestions.append("Grundkurs i administration och digitala kontorsverktyg")
-    if "engelska" in skill_gaps:
-        education_suggestions.append("Praktisk yrkesengelska")
-    if "it-support" in skill_gaps:
-        education_suggestions.append("Introduktion till IT-support och ärendehantering")
-
-    education_suggestions = list(dict.fromkeys(education_suggestions))
-
-    if num_jobs > 8 and avg_score >= 60:
-        focus = "jobb"
-        strength = "stark"
-    elif 3 <= num_jobs <= 7:
-        focus = "jobb_och_rad"
-        strength = "medel"
-    else:
-        focus = "jobb_och_utbildning"
-        strength = "svag"
-
-    explanation = (
-        f"Antal relevanta jobb: {num_jobs}. Genomsnittlig matchning: {avg_score:.1f}. "
-        f"Bedömning: {explanation_root} "
-        f"Kompletterande marknadskontext: {' '.join(web_context[:2])}"
-    )
-
-    result = AssessmentResult(
-        strength=strength,
-        explanation=explanation,
-        skill_gaps=skill_gaps,
-        education_suggestions=education_suggestions,
-        focus_for_agent_4=focus,
-    )
-
-    return {
-        "assessment": {
-            "strength": result.strength,
-            "explanation": result.explanation,
-            "skill_gaps": result.skill_gaps,
-            "education_suggestions": result.education_suggestions,
-            "focus_for_agent_4": result.focus_for_agent_4,
-        }
+def stub_training_suggestions(skill_gaps: list[str]) -> list[str]:
+    mapping = {
+        "truckkort": "Truckutbildning A/B",
+        "administration": "Grundkurs i administration och digitala kontorsverktyg",
+        "excel": "Excel grund till fortsättning",
+        "crm": "Introduktion till CRM-system och kundhantering",
+        "git": "Git och versionshantering för nybörjare",
+        "sql": "SQL-grunder för data och rapportering",
+        "docker": "Docker introduktion",
+        "api": "Grundkurs i API:er och integrationer",
     }
+
+    suggestions = [mapping[gap] for gap in skill_gaps if gap in mapping]
+    return sorted(set(suggestions)) or ["Kort yrkesanpassad kurs inom det område du vill söka jobb i"]
+
+
+def run_assessment_agent(state: FlowState) -> FlowState:
+    """Agent 3: Bedömningsagent."""
+    ensure_security_ok(state)
+
+    profile = state["candidate_profile"]
+    matched_jobs = state.get("matched_jobs", [])
+
+    average_score = round(
+        sum(job["score"] for job in matched_jobs) / max(len(matched_jobs), 1),
+        1,
+    )
+    relevant_count = len([job for job in matched_jobs if job["score"] >= 45])
+
+    all_required_skills: list[str] = []
+    for job in matched_jobs:
+        all_required_skills.extend(job["required_skills"])
+
+    required_counter = Counter(all_required_skills)
+    profile_skills = set(profile.get("skills", []))
+    skill_gaps = [skill for skill, _ in required_counter.most_common() if skill not in profile_skills][:5]
+
+    causes: list[str] = []
+
+    if relevant_count < 3:
+        causes.append("Det finns få relevanta jobb i den interna datakällan för vald profil.")
+    if average_score < 50:
+        causes.append("Matchningsnivån är överlag låg jämfört med krav i annonserna.")
+    if state["preferences"].get("employment_type") == "deltid":
+        causes.append("Önskemål om deltid minskar urvalet av jobb.")
+    if not profile.get("skills"):
+        causes.append("CV:t är otydligt eller innehåller för få tydliga kompetenser.")
+    if state["preferences"].get("location") and len(matched_jobs) <= 2:
+        causes.append("Geografisk begränsning påverkar sannolikt antalet träffar.")
+
+    if relevant_count > 8 and average_score >= 65:
+        strength = "strong"
+        focus = "jobs"
+        explanation = "Matchningen är stark. Det finns flera relevanta jobb med god överensstämmelse mot profilen."
+    elif 3 <= relevant_count <= 7:
+        strength = "medium"
+        focus = "jobs_and_advice"
+        explanation = "Matchningen är användbar men inte helt stark. Jobb bör kombineras med mindre kompetensråd."
+    else:
+        strength = "weak"
+        focus = "jobs_and_training"
+        explanation = "Matchningen är svag eller begränsad. Resultatet bör kompletteras med utbildningsförslag."
+
+    market_context = stub_web_search_role_context(profile)
+    suggestions = stub_training_suggestions(skill_gaps) if focus == "jobs_and_training" else []
+
+    state["assessment"] = {
+        "strength": strength,
+        "explanation": explanation,
+        "average_match_score": average_score,
+        "relevant_job_count": relevant_count,
+        "skill_gaps": skill_gaps,
+        "causes": causes,
+        "suggestions": suggestions,
+        "focus_for_agent_4": focus,
+        "market_context": market_context,
+    }
+
+    return state

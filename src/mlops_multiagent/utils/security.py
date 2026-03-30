@@ -1,86 +1,80 @@
-"""Säkerhetskontroll för inkommande dokument."""
-
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from mlops_multiagent.config import (
     ALLOWED_EXTENSIONS,
-    MAX_FILE_SIZE_MB,
-    MAX_TEXT_CHARS,
+    MAX_FILE_SIZE_BYTES,
     SUSPICIOUS_PATTERNS,
 )
-from mlops_multiagent.utils.document_loader import load_document_text
+from mlops_multiagent.utils.document_loader import DocumentLoadError, safe_extract_text
 
 
-def validate_file_type(file_path: Path) -> tuple[bool, str]:
-    """Kontrollerar att filtypen är tillåten."""
-    if file_path.suffix.lower() not in ALLOWED_EXTENSIONS:
-        return False, f"Otillåten filtyp: {file_path.suffix}. Endast .pdf och .docx stöds."
-    return True, "Filtypen är godkänd."
+def validate_file_type(path: Path) -> None:
+    if path.suffix.lower() not in ALLOWED_EXTENSIONS:
+        raise ValueError("Ogiltig filtyp. Endast .pdf och .docx stöds.")
 
 
-def validate_file_size(file_path: Path) -> tuple[bool, str]:
-    """Kontrollerar att filstorleken är rimlig."""
-    file_size_mb = file_path.stat().st_size / (1024 * 1024)
-    if file_size_mb > MAX_FILE_SIZE_MB:
-        return False, f"Filen är för stor ({file_size_mb:.2f} MB). Max är {MAX_FILE_SIZE_MB} MB."
-    return True, "Filstorleken är godkänd."
+def validate_file_size(path: Path) -> None:
+    if path.stat().st_size > MAX_FILE_SIZE_BYTES:
+        raise ValueError("Filen är för stor. Max tillåten storlek är 5 MB.")
 
 
 def detect_suspicious_content(text: str) -> list[str]:
-    """Letar efter enkla mönster som kan vara misstänkta i dokumentinnehållet."""
     lowered = text.lower()
-    found = [pattern for pattern in SUSPICIOUS_PATTERNS if pattern in lowered]
-    return found
+    matches: list[str] = []
+
+    for pattern in SUSPICIOUS_PATTERNS:
+        if re.search(pattern, lowered):
+            matches.append(pattern)
+
+    return matches
 
 
-def validate_document_security(file_path: Path) -> dict[str, object]:
-    """
-    Utför en enkel säkerhetskontroll:
-    - filtyp
-    - filstorlek
-    - säker textextraktion
-    - enkel upptäckt av misstänkta instruktioner
-    """
-    type_ok, type_msg = validate_file_type(file_path)
-    if not type_ok:
-        return {"approved": False, "message": type_msg, "document_text": ""}
+def run_security_check(cv_path: str) -> dict:
+    path = Path(cv_path)
 
-    size_ok, size_msg = validate_file_size(file_path)
-    if not size_ok:
-        return {"approved": False, "message": size_msg, "document_text": ""}
+    if not path.exists():
+        return {
+            "is_safe": False,
+            "reasons": ["Filen kunde inte hittas."],
+            "extracted_text": "",
+            "detected_signals": [],
+        }
 
     try:
-        text = load_document_text(file_path)
+        validate_file_type(path)
+        validate_file_size(path)
+
+        extracted_text = safe_extract_text(path)
+
+        reasons: list[str] = []
+        if not extracted_text.strip():
+            reasons.append("Dokumentet innehåller ingen läsbar text.")
+
+        signals = detect_suspicious_content(extracted_text)
+        if signals:
+            reasons.append("Dokumentet innehåller misstänkta eller skadliga instruktioner.")
+
+        return {
+            "is_safe": len(reasons) == 0,
+            "reasons": reasons,
+            "extracted_text": extracted_text[:50000],
+            "detected_signals": signals,
+        }
+
+    except (ValueError, DocumentLoadError) as exc:
+        return {
+            "is_safe": False,
+            "reasons": [str(exc)],
+            "extracted_text": "",
+            "detected_signals": [],
+        }
     except Exception as exc:
         return {
-            "approved": False,
-            "message": f"Kunde inte läsa dokumentet säkert: {exc}",
-            "document_text": "",
+            "is_safe": False,
+            "reasons": [f"Tekniskt fel vid säkerhetskontroll: {exc}"],
+            "extracted_text": "",
+            "detected_signals": [],
         }
-
-    if not text.strip():
-        return {
-            "approved": False,
-            "message": "Dokumentet innehåller ingen läsbar text.",
-            "document_text": "",
-        }
-
-    trimmed_text = text[:MAX_TEXT_CHARS]
-    suspicious = detect_suspicious_content(trimmed_text)
-    if suspicious:
-        return {
-            "approved": False,
-            "message": (
-                "Dokumentet stoppades eftersom det innehåller misstänkta instruktioner "
-                f"eller mönster: {', '.join(suspicious)}"
-            ),
-            "document_text": "",
-        }
-
-    return {
-        "approved": True,
-        "message": f"{type_msg} {size_msg}",
-        "document_text": trimmed_text,
-    }

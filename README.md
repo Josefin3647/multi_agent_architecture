@@ -61,7 +61,7 @@ uv sync
 Start the program:
 
 ```bash
-uv run cv-flow
+uv run mlops-multiagent
 ```
 
 Follow the instructions in the terminal:

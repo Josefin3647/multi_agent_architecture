@@ -1,0 +1,200 @@
+[
+  {
+    "id": "job-001",
+    "title": "Butikssäljare deltid",
+    "company": "Retailhuset AB",
+    "location": "Uppsala",
+    "employment_type": "deltid",
+    "required_skills": ["kundservice", "butik", "svenska"],
+    "preferred_skills": ["försäljning", "engelska", "kassavana"]
+  },
+  {
+    "id": "job-002",
+    "title": "Kundservicemedarbetare",
+    "company": "Nordisk Support",
+    "location": "Uppsala",
+    "employment_type": "heltid",
+    "required_skills": ["kundservice", "kommunikation", "svenska"],
+    "preferred_skills": ["engelska", "crm", "administration"]
+  },
+  {
+    "id": "job-003",
+    "title": "Lagerarbetare med truckkort",
+    "company": "Logistikpartner",
+    "location": "Uppsala",
+    "employment_type": "heltid",
+    "required_skills": ["lager", "truckkort", "svenska"],
+    "preferred_skills": ["noggrannhet", "teamarbete"]
+  },
+  {
+    "id": "job-004",
+    "title": "Administratör deltid",
+    "company": "Kontorsservice Sverige",
+    "location": "Uppsala",
+    "employment_type": "deltid",
+    "required_skills": ["administration", "excel", "svenska"],
+    "preferred_skills": ["office", "kommunikation"]
+  },
+  {
+    "id": "job-005",
+    "title": "Junior Python-utvecklare",
+    "company": "TechNova",
+    "location": "Stockholm",
+    "employment_type": "heltid",
+    "required_skills": ["python", "git", "api"],
+    "preferred_skills": ["sql", "docker", "engelska"]
+  },
+  {
+    "id": "job-006",
+    "title": "Data Assistant",
+    "company": "Insight Ops",
+    "location": "Uppsala",
+    "employment_type": "heltid",
+    "required_skills": ["excel", "administration", "kommunikation"],
+    "preferred_skills": ["sql", "engelska"]
+  },
+  {
+    "id": "job-007",
+    "title": "Supporttekniker deltid",
+    "company": "IT Hjälpen",
+    "location": "Uppsala",
+    "employment_type": "deltid",
+    "required_skills": ["support", "kommunikation", "svenska"],
+    "preferred_skills": ["office", "engelska", "administration"]
+  },
+  {
+    "id": "job-008",
+    "title": "Butikssäljare deltid",
+    "company": "City Mode Stockholm",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["butik", "kundservice", "svenska"],
+    "preferred_skills": ["försäljning", "engelska", "kommunikation"]
+  },
+  {
+    "id": "job-009",
+    "title": "Kassamedarbetare deltid",
+    "company": "MatTorget Söder",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["kundservice", "svenska", "butik"],
+    "preferred_skills": ["försäljning", "engelska", "kassavana"]
+  },
+  {
+    "id": "job-010",
+    "title": "Receptionist deltid",
+    "company": "Office Point",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["kommunikation", "svenska", "administration"],
+    "preferred_skills": ["engelska", "office", "service"]
+  },
+  {
+    "id": "job-011",
+    "title": "Kundservicemedarbetare deltid",
+    "company": "NordCall Stockholm",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["kundservice", "kommunikation", "svenska"],
+    "preferred_skills": ["engelska", "crm", "administration"]
+  },
+  {
+    "id": "job-012",
+    "title": "Lagerarbetare deltid",
+    "company": "SnabbLogistik",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["lager", "svenska", "noggrannhet"],
+    "preferred_skills": ["truckkort", "teamarbete", "körkort"]
+  },
+  {
+    "id": "job-013",
+    "title": "Budbilschaufför deltid",
+    "company": "ExpressLeverans",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["körkort", "svenska", "service"],
+    "preferred_skills": ["lokalkännedom", "kundservice", "noggrannhet"]
+  },
+  {
+    "id": "job-014",
+    "title": "Administratör deltid",
+    "company": "City Admin Support",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["administration", "excel", "svenska"],
+    "preferred_skills": ["office", "kommunikation", "engelska"]
+  },
+  {
+    "id": "job-015",
+    "title": "Supportmedarbetare kvällstid",
+    "company": "HelpDesk Sverige",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["support", "kommunikation", "svenska"],
+    "preferred_skills": ["engelska", "crm", "administration"]
+  },
+  {
+    "id": "job-016",
+    "title": "Cafébiträde deltid",
+    "company": "Fika Centralen",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["kundservice", "svenska", "service"],
+    "preferred_skills": ["butik", "försäljning", "engelska"]
+  },
+  {
+    "id": "job-017",
+    "title": "Butiksmedarbetare helg",
+    "company": "Innerstan Retail",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["butik", "kundservice", "svenska"],
+    "preferred_skills": ["försäljning", "kommunikation", "engelska"]
+  },
+  {
+    "id": "job-018",
+    "title": "Lagerkoordinator",
+    "company": "Stockholm Supply Chain",
+    "location": "Stockholm",
+    "employment_type": "heltid",
+    "required_skills": ["lager", "administration", "excel"],
+    "preferred_skills": ["truckkort", "svenska", "kommunikation"]
+  },
+  {
+    "id": "job-019",
+    "title": "Junior dataassistent deltid",
+    "company": "DataSupport Nordic",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["excel", "administration", "kommunikation"],
+    "preferred_skills": ["sql", "engelska", "office"]
+  },
+  {
+    "id": "job-020",
+    "title": "Junior IT-support deltid",
+    "company": "Tech Support Hub",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["support", "kommunikation", "svenska"],
+    "preferred_skills": ["office", "engelska", "administration"]
+  },
+  {
+    "id": "job-021",
+    "title": "Telefonbokare deltid",
+    "company": "MötesExperten",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["kommunikation", "svenska", "kundservice"],
+    "preferred_skills": ["försäljning", "crm", "engelska"]
+  },
+  {
+    "id": "job-022",
+    "title": "Kontorsassistent deltid",
+    "company": "Nordic Office Services",
+    "location": "Stockholm",
+    "employment_type": "deltid",
+    "required_skills": ["administration", "office", "svenska"],
+    "preferred_skills": ["excel", "kommunikation", "engelska"]
+  }
+]

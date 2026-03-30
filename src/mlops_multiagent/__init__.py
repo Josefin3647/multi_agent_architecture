@@ -1,1 +1,1 @@
-"""Multi-agent CV flow package."""
+"""mlops_multiagent package."""

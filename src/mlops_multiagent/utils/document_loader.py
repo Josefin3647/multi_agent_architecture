@@ -1,5 +1,3 @@
-"""Säker och enkel inläsning av PDF- och DOCX-filer."""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -8,32 +6,34 @@ from docx import Document
 from pypdf import PdfReader
 
 
-def read_pdf_text(file_path: Path) -> str:
-    """Läser text från PDF med pypdf."""
-    reader = PdfReader(str(file_path))
-    text_parts: list[str] = []
-
-    for page in reader.pages:
-        page_text = page.extract_text() or ""
-        text_parts.append(page_text)
-
-    return "\n".join(text_parts).strip()
+class DocumentLoadError(Exception):
+    """Raised when a document cannot be safely loaded."""
 
 
-def read_docx_text(file_path: Path) -> str:
-    """Läser text från DOCX med python-docx."""
-    document = Document(str(file_path))
-    paragraphs = [paragraph.text for paragraph in document.paragraphs if paragraph.text.strip()]
-    return "\n".join(paragraphs).strip()
+def extract_text_from_pdf(path: Path) -> str:
+    try:
+        reader = PdfReader(str(path))
+        pages = [page.extract_text() or "" for page in reader.pages]
+        return "\n".join(pages)
+    except Exception as exc:
+        raise DocumentLoadError(f"Kunde inte läsa PDF-filen: {exc}") from exc
 
 
-def load_document_text(file_path: Path) -> str:
-    """Väljer rätt loader beroende på filändelse."""
-    suffix = file_path.suffix.lower()
+def extract_text_from_docx(path: Path) -> str:
+    try:
+        document = Document(str(path))
+        paragraphs = [paragraph.text for paragraph in document.paragraphs]
+        return "\n".join(paragraphs)
+    except Exception as exc:
+        raise DocumentLoadError(f"Kunde inte läsa Word-filen: {exc}") from exc
+
+
+def safe_extract_text(path: Path) -> str:
+    suffix = path.suffix.lower()
 
     if suffix == ".pdf":
-        return read_pdf_text(file_path)
+        return extract_text_from_pdf(path)
     if suffix == ".docx":
-        return read_docx_text(file_path)
+        return extract_text_from_docx(path)
 
-    raise ValueError(f"Filtypen {suffix} stöds inte.")
+    raise DocumentLoadError("Ogiltig filtyp. Endast PDF och DOCX stöds.")
