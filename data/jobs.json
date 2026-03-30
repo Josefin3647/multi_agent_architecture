@@ -75,7 +75,7 @@
     "id": "job-009",
     "title": "Kassamedarbetare deltid",
     "company": "MatTorget Söder",
-    "location": "Stockholm",
+    "location": "Göteborg",
     "employment_type": "deltid",
     "required_skills": ["kundservice", "svenska", "butik"],
     "preferred_skills": ["försäljning", "engelska", "kassavana"]
@@ -84,7 +84,7 @@
     "id": "job-010",
     "title": "Receptionist deltid",
     "company": "Office Point",
-    "location": "Stockholm",
+    "location": "Umeå",
     "employment_type": "deltid",
     "required_skills": ["kommunikation", "svenska", "administration"],
     "preferred_skills": ["engelska", "office", "service"]
@@ -111,7 +111,7 @@
     "id": "job-013",
     "title": "Budbilschaufför deltid",
     "company": "ExpressLeverans",
-    "location": "Stockholm",
+    "location": "Göteborg",
     "employment_type": "deltid",
     "required_skills": ["körkort", "svenska", "service"],
     "preferred_skills": ["lokalkännedom", "kundservice", "noggrannhet"]
@@ -147,7 +147,7 @@
     "id": "job-017",
     "title": "Butiksmedarbetare helg",
     "company": "Innerstan Retail",
-    "location": "Stockholm",
+    "location": "Linköping",
     "employment_type": "deltid",
     "required_skills": ["butik", "kundservice", "svenska"],
     "preferred_skills": ["försäljning", "kommunikation", "engelska"]
@@ -183,7 +183,7 @@
     "id": "job-021",
     "title": "Telefonbokare deltid",
     "company": "MötesExperten",
-    "location": "Stockholm",
+    "location": "Örebro",
     "employment_type": "deltid",
     "required_skills": ["kommunikation", "svenska", "kundservice"],
     "preferred_skills": ["försäljning", "crm", "engelska"]
