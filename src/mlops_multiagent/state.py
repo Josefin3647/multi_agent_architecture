@@ -1,4 +1,4 @@
-"""Shared state för LangGraph-flödet."""
+"""Shared state for the LangGraph workflow."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from typing import Any, TypedDict
 
 
 class AppState(TypedDict, total=False):
-    """Delad state som skickas mellan noderna i grafen."""
+    """Shared state passed between the nodes in the graph."""
 
     user_input: dict[str, Any]
     security: dict[str, Any]

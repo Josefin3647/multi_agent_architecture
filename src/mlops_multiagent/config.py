@@ -1,8 +1,8 @@
-"""Central konfiguration för projektet."""
+"""Central configuration for the project."""
 
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parents[3]
+BASE_DIR = Path(__file__).resolve().parents[2]
 SAMPLE_DATA_DIR = BASE_DIR / "sample_data"
 DEFAULT_JOBS_PATH = SAMPLE_DATA_DIR / "jobs.json"
 

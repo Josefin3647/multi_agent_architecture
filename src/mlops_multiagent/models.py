@@ -1,4 +1,4 @@
-"""Datamodeller för kandidatprofil, jobbmatchning och rekommendationer."""
+"""Data models for candidate profile, job matching, and recommendations."""
 
 from __future__ import annotations
 
@@ -6,18 +6,18 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 
-EmploymentType = Literal["heltid", "deltid"]
-AssessmentFocus = Literal["jobb", "jobb_och_rad", "jobb_och_utbildning"]
+EmploymentType = Literal["full-time", "part-time"]
+AssessmentFocus = Literal["job", "job_and_advice", "job_and_education"]
 
 
 @dataclass
 class CandidateProfile:
-    """Strukturerad kandidatprofil som delas mellan agenterna."""
+    """Structured candidate profile shared between agents."""
 
     raw_text: str
     experiences: list[str] = field(default_factory=list)
     skills: list[str] = field(default_factory=list)
-    education_level: str = "okänd"
+    education_level: str = "unknown"
     desired_location: str = ""
     desired_employment_type: str = ""
     languages: list[str] = field(default_factory=list)
@@ -28,7 +28,7 @@ class CandidateProfile:
 
 @dataclass
 class JobPosting:
-    """Intern representation av en jobbannons."""
+    """Internal representation of a job posting."""
 
     id: str
     title: str
@@ -41,7 +41,7 @@ class JobPosting:
 
 @dataclass
 class JobMatch:
-    """Resultat av matchning mellan kandidatprofil och jobbannons."""
+    """Result of matching between candidate profile and job posting."""
 
     job_id: str
     title: str
@@ -54,18 +54,18 @@ class JobMatch:
 
 @dataclass
 class AssessmentResult:
-    """Bedömning från Agent 3."""
+    """Assessment from Agent 3."""
 
     strength: str
     explanation: str
     skill_gaps: list[str] = field(default_factory=list)
     education_suggestions: list[str] = field(default_factory=list)
-    focus_for_agent_4: AssessmentFocus = "jobb"
+    focus_for_agent_4: AssessmentFocus = "job"
 
 
 @dataclass
 class ContactRequest:
-    """Personuppgifter som samlas in i HITL-steget."""
+    """Personal details collected during the HITL step."""
 
     wants_contact: bool
     name: str = ""

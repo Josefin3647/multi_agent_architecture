@@ -53,12 +53,17 @@ def rejection_node(state: AppState) -> dict[str, Any]:
 def hitl_node(state: AppState) -> dict[str, Any]:
     """Enkelt HITL-steg i terminalen efter Agent 4."""
     print("\n" + "=" * 80)
-    print("HITL – personlig kontakt")
+    print("RESULT")
+    print("=" * 80)
+    print(state.get("final_recommendation", "No recommendation was generated."))
+
+    print("\n" + "=" * 80)
+    print("HITL – personal contact")
     print("=" * 80)
 
-    answer = input("Vill du bli kontaktad personligen? (ja/nej): ").strip().lower()
+    answer = input("Would you like to be contacted personally? (yes/no): ").strip().lower()
 
-    if not answer or answer == "nej":
+    if not answer or answer == "no":
         contact = ContactRequest(wants_contact=False)
         return {
             "hitl": {
@@ -68,9 +73,9 @@ def hitl_node(state: AppState) -> dict[str, Any]:
             }
         }
 
-    if answer == "ja":
-        name = input("Ange ditt namn: ").strip()
-        email = input("Ange din e-post: ").strip()
+    if answer == "yes":
+        name = input("Enter your name: ").strip()
+        email = input("Enter your email: ").strip()
         contact = ContactRequest(wants_contact=True, name=name, email=email)
         return {
             "hitl": {
