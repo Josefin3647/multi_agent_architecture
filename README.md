@@ -25,6 +25,7 @@ The system validates uploaded CV files, extracts candidate information, matches 
 
 ## Project Structure
 
+```
 multi-agent-cv-flow/
 ├─ pyproject.toml
 ├─ README.md
@@ -52,7 +53,7 @@ multi-agent-cv-flow/
          ├─ document_loader.py
          ├─ security.py
          └─ text_processing.py
-
+```
 ---
 
 ## Installation
